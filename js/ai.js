@@ -6,14 +6,6 @@ function ensureTensorFlow() {
   }
 }
 
-function gaussianNoise() {
-  let u = 0;
-  let v = 0;
-  while (u === 0) u = Math.random();
-  while (v === 0) v = Math.random();
-  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-}
-
 export class BirdBrain {
   constructor(model = null) {
     ensureTensorFlow();
@@ -57,64 +49,47 @@ export class BirdBrain {
 
   clone() {
     const clonedModel = BirdBrain.createModel();
-    const sourceWeights = this.model.getWeights();
-    const clonedWeights = sourceWeights.map((weight) => weight.clone());
-
-    clonedModel.setWeights(clonedWeights);
-
-    sourceWeights.forEach((weight) => weight.dispose());
-    clonedWeights.forEach((weight) => weight.dispose());
+    // Keep all temporary tensors inside tidy to avoid disposing model variables by mistake.
+    tf.tidy(() => {
+      const sourceWeights = this.model.getWeights();
+      const clonedWeights = sourceWeights.map((weight) => weight.clone());
+      clonedModel.setWeights(clonedWeights);
+    });
 
     return new BirdBrain(clonedModel);
   }
 
   crossover(otherBrain) {
     const childModel = BirdBrain.createModel();
-    const firstWeights = this.model.getWeights();
-    const secondWeights = otherBrain.model.getWeights();
-    const mergedWeights = [];
+    tf.tidy(() => {
+      const firstWeights = this.model.getWeights();
+      const secondWeights = otherBrain.model.getWeights();
+      const mergedWeights = firstWeights.map((firstWeight, i) => {
+        const secondWeight = secondWeights[i];
+        const chooser = tf.randomUniform(firstWeight.shape).less(0.5);
+        return tf.where(chooser, firstWeight, secondWeight);
+      });
 
-    for (let i = 0; i < firstWeights.length; i += 1) {
-      const aData = firstWeights[i].dataSync();
-      const bData = secondWeights[i].dataSync();
-      const mixed = new Float32Array(aData.length);
-
-      for (let j = 0; j < mixed.length; j += 1) {
-        mixed[j] = Math.random() < 0.5 ? aData[j] : bData[j];
-      }
-
-      mergedWeights.push(tf.tensor(mixed, firstWeights[i].shape));
-    }
-
-    childModel.setWeights(mergedWeights);
-
-    firstWeights.forEach((weight) => weight.dispose());
-    secondWeights.forEach((weight) => weight.dispose());
-    mergedWeights.forEach((weight) => weight.dispose());
+      childModel.setWeights(mergedWeights);
+    });
 
     return new BirdBrain(childModel);
   }
 
   mutate(rate = 0.1, amount = 0.25) {
-    const currentWeights = this.model.getWeights();
-    const mutatedWeights = currentWeights.map((weightTensor) => {
-      const weightData = weightTensor.dataSync();
-      const mutatedData = new Float32Array(weightData.length);
+    tf.tidy(() => {
+      const currentWeights = this.model.getWeights();
+      const mutatedWeights = currentWeights.map((weightTensor) => {
+        const mutationMask = tf.cast(
+          tf.randomUniform(weightTensor.shape).less(rate),
+          "float32"
+        );
+        const noise = tf.randomNormal(weightTensor.shape, 0, amount);
+        return weightTensor.add(mutationMask.mul(noise));
+      });
 
-      for (let i = 0; i < weightData.length; i += 1) {
-        const shouldMutate = Math.random() < rate;
-        mutatedData[i] = shouldMutate
-          ? weightData[i] + gaussianNoise() * amount
-          : weightData[i];
-      }
-
-      return tf.tensor(mutatedData, weightTensor.shape);
+      this.model.setWeights(mutatedWeights);
     });
-
-    this.model.setWeights(mutatedWeights);
-
-    currentWeights.forEach((weight) => weight.dispose());
-    mutatedWeights.forEach((weight) => weight.dispose());
   }
 
   dispose() {
