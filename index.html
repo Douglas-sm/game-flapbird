@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Flappy AI Trainer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="top-bar">
+      <h1>Pixel Flappy Bird AI</h1>
+      <p>Canvas 2D + TensorFlow.js + Genetic Training</p>
+    </header>
+
+    <main class="layout">
+      <section class="game-area">
+        <canvas id="gameCanvas" width="480" height="640" aria-label="Flappy Bird AI simulation"></canvas>
+        <p id="modeHint" class="mode-hint">Mode: Single agent visual training</p>
+      </section>
+
+      <aside class="side-panel">
+        <h2>Learning Dashboard</h2>
+
+        <div class="stats-grid">
+          <span>Current generation</span><strong id="statGeneration">1</strong>
+          <span>Current agent</span><strong id="statCurrentAgent">1</strong>
+          <span>Current score</span><strong id="statCurrentScore">0</strong>
+          <span>Best score (historical)</span><strong id="statBestScore">0</strong>
+          <span>Generation best</span><strong id="statGenerationBest">0</strong>
+          <span>Average generation score</span><strong id="statAvgScore">0</strong>
+          <span>Agents tested</span><strong id="statAgentsTested">0</strong>
+          <span>Total deaths</span><strong id="statDeaths">0</strong>
+          <span>Simulation speed</span><strong id="statSpeed">1x</strong>
+        </div>
+
+        <h3>AI Live State</h3>
+        <div class="stats-grid live-grid">
+          <span>Current AI state</span><strong id="statAIState">Paused</strong>
+          <span>Raw NN output</span><strong id="statOutput">0.000</strong>
+          <span>Current AI decision</span><strong id="statDecision">Waiting</strong>
+        </div>
+
+        <h3>SPACE Key Simulation</h3>
+        <div class="space-wrap">
+          <div id="spaceKey" class="space-key">SPACE</div>
+          <p id="spaceStatus" class="space-status">Waiting for decision</p>
+        </div>
+
+        <h3>Controls</h3>
+        <div class="control-row">
+          <button id="startBtn" type="button">Start training</button>
+          <button id="pauseBtn" type="button">Pause training</button>
+          <button id="resetBtn" type="button">Reset training</button>
+        </div>
+
+        <div class="control-row">
+          <button id="speedUpBtn" type="button">Speed up training</button>
+          <button id="normalSpeedBtn" type="button">Normal speed</button>
+        </div>
+
+        <fieldset class="mode-select">
+          <legend>Render mode</legend>
+          <label>
+            <input type="radio" name="renderMode" value="single" checked>
+            Show 1 agent visually
+          </label>
+          <label>
+            <input type="radio" name="renderMode" value="batch">
+            Train multiple agents (simplified render)
+          </label>
+        </fieldset>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
