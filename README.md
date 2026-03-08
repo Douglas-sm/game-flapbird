@@ -2,6 +2,12 @@
 
 Flappy Bird em pixel art com IA treinando no navegador usando Canvas 2D + TensorFlow.js.
 
+## Novidades de treino com TensorFlow
+
+- Fine-tuning por geração com `model.fit` usando experiências dos melhores agentes.
+- Métricas ao vivo de `loss`, `accuracy` e número de amostras usadas no ajuste.
+- Gráfico de evolução no painel (`best`, `avg` e `tf loss`) para acompanhar o progresso.
+
 ## Estrutura
 
 - `index.html`
@@ -15,6 +21,7 @@ Flappy Bird em pixel art com IA treinando no navegador usando Canvas 2D + Tensor
 - `js/ai.js`
 - `js/training.js`
 - `js/ui.js`
+- `js/evolution-chart.js`
 
 ## Como rodar com pnpm + Node server
 

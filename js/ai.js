@@ -10,6 +10,7 @@ export class BirdBrain {
   constructor(model = null) {
     ensureTensorFlow();
     this.model = model ?? BirdBrain.createModel();
+    this.isCompiled = false;
   }
 
   static createModel() {
@@ -90,6 +91,39 @@ export class BirdBrain {
 
       this.model.setWeights(mutatedWeights);
     });
+  }
+
+  ensureCompiled(learningRate = 0.003) {
+    if (this.isCompiled) {
+      return;
+    }
+
+    this.model.compile({
+      optimizer: tf.train.adam(learningRate),
+      loss: "binaryCrossentropy",
+      metrics: ["accuracy"],
+    });
+    this.isCompiled = true;
+  }
+
+  async trainWithExamples(inputTensor, labelTensor, options = {}) {
+    this.ensureCompiled(options.learningRate);
+
+    const history = await this.model.fit(inputTensor, labelTensor, {
+      epochs: options.epochs ?? 4,
+      batchSize: options.batchSize ?? 64,
+      shuffle: true,
+      verbose: 0,
+    });
+
+    const lossHistory = history.history.loss ?? [];
+    const accuracyHistory = history.history.accuracy ?? history.history.acc ?? [];
+
+    return {
+      loss: Number(lossHistory[lossHistory.length - 1] ?? 0),
+      accuracy: Number(accuracyHistory[accuracyHistory.length - 1] ?? 0),
+      epochs: options.epochs ?? 4,
+    };
   }
 
   dispose() {

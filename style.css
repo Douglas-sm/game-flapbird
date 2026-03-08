@@ -108,6 +108,20 @@ body {
   border: 2px solid #8f8151;
 }
 
+.tf-grid {
+  margin-bottom: 8px;
+}
+
+.tf-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 2px solid #4a5f77;
+  background: #111f2b;
+  margin-bottom: 12px;
+  image-rendering: pixelated;
+}
+
 .control-row {
   display: flex;
   flex-wrap: wrap;

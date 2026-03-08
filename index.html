@@ -42,6 +42,20 @@
           <span>Current AI decision</span><strong id="statDecision">Waiting</strong>
         </div>
 
+        <h3>TensorFlow Evolution</h3>
+        <div class="stats-grid live-grid tf-grid">
+          <span>TensorFlow loss</span><strong id="statTfLoss">-</strong>
+          <span>TensorFlow accuracy</span><strong id="statTfAccuracy">-</strong>
+          <span>Fine-tune samples</span><strong id="statTfSamples">0</strong>
+        </div>
+        <canvas
+          id="tfEvolutionChart"
+          class="tf-chart"
+          width="420"
+          height="170"
+          aria-label="TensorFlow training evolution chart"
+        ></canvas>
+
         <h3>SPACE Key Simulation</h3>
         <div class="space-wrap">
           <div id="spaceKey" class="space-key">SPACE</div>

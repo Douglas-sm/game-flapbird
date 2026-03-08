@@ -1,3 +1,5 @@
+import { EvolutionChart } from "./evolution-chart.js";
+
 export class UIController {
   constructor(training) {
     this.training = training;
@@ -16,6 +18,10 @@ export class UIController {
       aiState: document.getElementById("statAIState"),
       output: document.getElementById("statOutput"),
       decision: document.getElementById("statDecision"),
+      tfLoss: document.getElementById("statTfLoss"),
+      tfAccuracy: document.getElementById("statTfAccuracy"),
+      tfSamples: document.getElementById("statTfSamples"),
+      tfChart: document.getElementById("tfEvolutionChart"),
       spaceKey: document.getElementById("spaceKey"),
       spaceStatus: document.getElementById("spaceStatus"),
       modeHint: document.getElementById("modeHint"),
@@ -27,6 +33,7 @@ export class UIController {
       modeRadios: document.querySelectorAll("input[name='renderMode']"),
     };
 
+    this.evolutionChart = new EvolutionChart(this.refs.tfChart);
     this.bindControls();
   }
 
@@ -84,6 +91,15 @@ export class UIController {
     this.refs.aiState.textContent = stats.aiState;
     this.refs.output.textContent = Number(stats.aiOutput).toFixed(3);
     this.refs.decision.textContent = stats.aiDecision;
+
+    this.refs.tfLoss.textContent =
+      Number.isFinite(stats.tfLoss) && stats.tfLoss !== null ? stats.tfLoss.toFixed(4) : "-";
+    this.refs.tfAccuracy.textContent =
+      Number.isFinite(stats.tfAccuracy) && stats.tfAccuracy !== null
+        ? `${(stats.tfAccuracy * 100).toFixed(1)}%`
+        : "-";
+    this.refs.tfSamples.textContent = String(stats.tfSamples ?? 0);
+    this.evolutionChart.render(stats.tfHistory ?? []);
   }
 
   updateSpaceVisual() {
