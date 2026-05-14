@@ -16,6 +16,8 @@
 
 ## Demo
 
+[Live Demo](https://game-flapbird.vercel.app/)
+
 ![Pixel Flappy Bird AI dashboard demo](assets/demo/demo.png)
 
 The demo screen is split into two main areas:
