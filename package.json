@@ -2,7 +2,10 @@
   "name": "game-flapbird",
   "version": "1.0.0",
   "private": true,
-  "description": "Flappy Bird pixel art com IA no navegador (Canvas 2D + TensorFlow.js)",
+  "description": "Pixel-art Flappy Bird AI trainer in the browser with Canvas 2D and TensorFlow.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
