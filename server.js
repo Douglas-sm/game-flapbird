@@ -4,7 +4,7 @@ const path = require("path");
 
 const HOST = "0.0.0.0";
 const PORT = Number(process.env.PORT) || 3000;
-const ROOT = path.resolve(process.cwd());
+const DEFAULT_ROOT = path.resolve(process.cwd());
 
 const MIME_TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -30,14 +30,14 @@ function sendError(res, code, message, headers = {}) {
   res.end(message);
 }
 
-function safePath(urlPath) {
+function safePath(root, urlPath) {
   const decoded = decodeURIComponent(urlPath);
   const normalized = path.normalize(decoded).replace(/^([/\\])+/, "");
-  return path.resolve(ROOT, normalized);
+  return path.resolve(root, normalized);
 }
 
-function isPublicPath(filePath) {
-  const relativePath = path.relative(ROOT, filePath);
+function isPublicPath(root, filePath) {
+  const relativePath = path.relative(root, filePath);
 
   if (!relativePath || relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
     return false;
@@ -49,64 +49,70 @@ function isPublicPath(filePath) {
   );
 }
 
-function serverHandler(req, res) {
-  if (!["GET", "HEAD"].includes(req.method)) {
-    sendError(res, 405, "Method Not Allowed", { Allow: "GET, HEAD" });
-    return;
-  }
+function createStaticHandler({ root = DEFAULT_ROOT } = {}) {
+  const staticRoot = path.resolve(root);
 
-  const pathname = req.url.split("?")[0] || "/";
-  const requestPath = pathname === "/" ? "/index.html" : pathname;
-  let filePath;
+  return function staticHandler(req, res) {
+    if (!["GET", "HEAD"].includes(req.method)) {
+      sendError(res, 405, "Method Not Allowed", { Allow: "GET, HEAD" });
+      return;
+    }
 
-  try {
-    filePath = safePath(requestPath);
-  } catch {
-    sendError(res, 400, "Bad Request");
-    return;
-  }
+    const pathname = req.url.split("?")[0] || "/";
+    const requestPath = pathname === "/" ? "/index.html" : pathname;
+    let filePath;
 
-  if (!filePath.startsWith(`${ROOT}${path.sep}`) && filePath !== ROOT) {
-    sendError(res, 403, "Forbidden");
-    return;
-  }
+    try {
+      filePath = safePath(staticRoot, requestPath);
+    } catch {
+      sendError(res, 400, "Bad Request");
+      return;
+    }
 
-  if (!isPublicPath(filePath)) {
-    sendError(res, 404, "Not Found");
-    return;
-  }
+    if (!filePath.startsWith(`${staticRoot}${path.sep}`) && filePath !== staticRoot) {
+      sendError(res, 403, "Forbidden");
+      return;
+    }
 
-  fs.stat(filePath, (statErr, stat) => {
-    if (statErr || !stat.isFile()) {
+    if (!isPublicPath(staticRoot, filePath)) {
       sendError(res, 404, "Not Found");
       return;
     }
 
-    const ext = path.extname(filePath).toLowerCase();
-    const mimeType = MIME_TYPES[ext] || "application/octet-stream";
-
-    res.writeHead(200, {
-      "Content-Type": mimeType,
-      "Cache-Control": "no-store",
-    });
-
-    if (req.method === "HEAD") {
-      res.end();
-      return;
-    }
-
-    const stream = fs.createReadStream(filePath);
-    stream.on("error", () => {
-      if (!res.headersSent) {
-        sendError(res, 500, "Internal Server Error");
+    fs.stat(filePath, (statErr, stat) => {
+      if (statErr || !stat.isFile()) {
+        sendError(res, 404, "Not Found");
         return;
       }
 
-      res.destroy();
+      const ext = path.extname(filePath).toLowerCase();
+      const mimeType = MIME_TYPES[ext] || "application/octet-stream";
+
+      res.writeHead(200, {
+        "Content-Type": mimeType,
+        "Cache-Control": "no-store",
+      });
+
+      if (req.method === "HEAD") {
+        res.end();
+        return;
+      }
+
+      const stream = fs.createReadStream(filePath);
+      stream.on("error", () => {
+        if (!res.headersSent) {
+          sendError(res, 500, "Internal Server Error");
+          return;
+        }
+
+        res.destroy();
+      });
+      stream.pipe(res);
     });
-    stream.pipe(res);
-  });
+  };
 }
+
+const serverHandler = createStaticHandler();
 
 if (require.main === module) {
   const server = http.createServer(serverHandler);
@@ -117,3 +123,4 @@ if (require.main === module) {
 }
 
 module.exports = serverHandler;
+module.exports.createStaticHandler = createStaticHandler;
