@@ -2,5 +2,21 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "buildCommand": "pnpm run build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "functions": {
+    "api/index.js": {
+      "includeFiles": [
+        "index.html",
+        "style.css",
+        "js/**",
+        "assets/**"
+      ]
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "destination": "/api"
+    }
+  ]
 }
