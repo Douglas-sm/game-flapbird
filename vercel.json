@@ -9,14 +9,19 @@
         "index.html",
         "style.css",
         "js/**",
-        "assets/**"
+        "assets/**",
+        "dist/**"
       ]
     }
   },
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "/api/index.js"
+      "destination": "/api/index.js?path=:path*"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/api/index.js?path=:path*"
     }
   ]
 }
