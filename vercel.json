@@ -1,11 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
   "cleanUrls": true,
   "buildCommand": "pnpm run build",
+  "devCommand": "pnpm start",
   "outputDirectory": "dist",
   "functions": {
     "api/index.js": {
-      "includeFiles": "{index.html,style.css,js/**,assets/**,dist/**}"
+      "includeFiles": "dist/**"
     }
   },
   "rewrites": [

@@ -1,4 +1,9 @@
-const serverHandler = require("../server");
+const path = require("path");
+const { createStaticHandler } = require("../server");
+
+const distHandler = createStaticHandler({
+  root: path.join(process.cwd(), "dist"),
+});
 
 function getPathFromQuery(queryPath) {
   if (Array.isArray(queryPath)) {
@@ -19,7 +24,7 @@ function vercelHandler(req, res) {
     req.url = pathname ? `/${pathname}${url.search || ""}` : "/";
   }
 
-  return serverHandler(req, res);
+  return distHandler(req, res);
 }
 
 module.exports = vercelHandler;
