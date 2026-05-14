@@ -9,14 +9,14 @@ function getPathFromQuery(queryPath) {
 }
 
 function vercelHandler(req, res) {
+  const url = new URL(req.url, "http://localhost");
+
   if (req.query && Object.prototype.hasOwnProperty.call(req.query, "path")) {
-    const url = new URL(req.url, "http://localhost");
     const pathname = getPathFromQuery(req.query.path);
 
     url.searchParams.delete("path");
-    req.url = `/${pathname}${url.search || ""}`;
-  } else if (req.url === "/api") {
-    req.url = "/";
+
+    req.url = pathname ? `/${pathname}${url.search || ""}` : "/";
   }
 
   return serverHandler(req, res);
