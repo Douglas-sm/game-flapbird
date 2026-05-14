@@ -50,7 +50,7 @@ The GIF demonstrates the training loop in action:
 - **Evolution chart** for best score, average score, and TensorFlow loss across generations.
 - **Single-agent visual mode** for easier observation.
 - **Batch training mode** for faster multi-agent simulation with simplified rendering.
-- **Zero backend framework**: the local server only serves static files.
+- **Zero backend framework**: Node.js only serves static files locally
 
 ## How The AI Works
 
@@ -125,6 +125,14 @@ Then open:
 http://localhost:3000
 ```
 
+## Building Static Assets
+
+```bash
+pnpm run build
+```
+
+The build script copies `index.html`, `style.css`, `js/`, and `assets/` into `dist/`. The `dist/` directory is generated output and is not committed to the repository.
+
 ## Running With npm
 
 ```bash
@@ -144,8 +152,10 @@ The project does not require local runtime dependencies today. The install step 
 
 | Command | Description |
 | --- | --- |
+| `pnpm run build` | Generates the production static files in `dist/` |
 | `pnpm start` | Starts the local Node.js static server |
 | `pnpm dev` | Same as `start`, useful during development |
+| `npm run build` | Generates the production static files in `dist/` |
 | `npm start` | Starts the local Node.js static server |
 | `npm run dev` | Same as `start`, useful during development |
 
@@ -171,6 +181,8 @@ PORT=4000 npm start
 
 ```text
 .
+├── api/
+│   └── index.js           # Vercel Function entrypoint
 ├── assets/
 │   └── demo/
 │       ├── demo.png        # Main README screenshot
@@ -187,7 +199,10 @@ PORT=4000 npm start
 ├── index.html              # App shell and TensorFlow.js CDN script
 ├── package.json            # Scripts and package metadata
 ├── pnpm-lock.yaml          # pnpm lockfile
-├── server.js               # Minimal static file server
+├── scripts/
+│   └── build-static.js     # Static production build generator
+├── server.js               # Static file handler and local server
+├── vercel.json             # Vercel build, function, and rewrite configuration
 └── style.css               # Retro dashboard styling
 ```
 
@@ -198,6 +213,7 @@ PORT=4000 npm start
 - Canvas image smoothing is disabled to preserve the pixel-art look.
 - Batch mode prioritizes training speed over visual detail.
 - The static server sets `Cache-Control: no-store` so changes are easier to test while developing.
+- In production, `api/index.js` serves only files generated into `dist/`; run `pnpm run build` before testing the serverless handler locally.
 
 ## Troubleshooting
 
@@ -207,6 +223,8 @@ PORT=4000 npm start
 | Browser shows a blank page | Open DevTools and check for JavaScript module or CDN loading errors. |
 | Port `3000` is already in use | Run with another port, for example `PORT=4000 npm start`. |
 | `pnpm` is unavailable | Use `npm start`, or enable Corepack and prepare pnpm for your Node installation. |
+| Vercel deploy cannot find files | Confirm the build ran and `dist/index.html`, `dist/style.css`, and `dist/js/main.js` exist. |
+| Vercel settings differ from production | Set the framework to `Other`, use `pnpm run build`, output `dist`, and remove the install command override. |
 | Training looks slow at first | Use `Speed up training` or switch to batch render mode. Early generations are expected to fail quickly. |
 
 ## License
