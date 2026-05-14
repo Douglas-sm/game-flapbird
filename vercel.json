@@ -5,13 +5,7 @@
   "outputDirectory": "dist",
   "functions": {
     "api/index.js": {
-      "includeFiles": [
-        "index.html",
-        "style.css",
-        "js/**",
-        "assets/**",
-        "dist/**"
-      ]
+      "includeFiles": "{index.html,style.css,js/**,assets/**,dist/**}"
     }
   },
   "rewrites": [
